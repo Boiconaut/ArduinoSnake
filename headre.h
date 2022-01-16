@@ -29,6 +29,8 @@ unsigned long timer = 0;
 int length;
 int score;
 byte direction;
+int step;
+byte speed;
 
 struct Position{
   int x;

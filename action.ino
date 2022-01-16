@@ -8,19 +8,17 @@ void NewGame(){
   score = 0;
   direction = 1;
   length = START_LENGTH;
-  snake = calloc(length, sizeof(Position));
+  snake = calloc(length, step);
   Position *p = snake;
   int i = 0;
   
-  for(; p < snake + length * sizeof(Position); p += sizeof(Position)){
+  for(; p < snake + length * step; p += step){
     p->x = START_X - A * i;
     p->y = START_Y;
     i++;
   }
   
-  apple->x = BOUND_MARGIN + random(WIDTH - A - 2 * BOUND_MARGIN);
-  apple->y = BOUND_MARGIN + random(BOUND_HEIGHT - A - 2 * BOUND_MARGIN);
-
+  UpdateApple();
   DrawSnake();
   DrawApple();
 }
@@ -45,37 +43,37 @@ void Move(){
     default:
       break;
   }
-
-  Position *p0 = calloc(length, sizeof(Position));
-  for(int i = 0; i < length * sizeof(Position); i += sizeof(Position)){
-    *(p0 + i) = *(snake + i);
-  }
-  snake->x += offset_x;
-  snake->y += offset_y;
-  /*Position *p = snake + (length - 1) * sizeof(Position);
-  *(snake + sizeof(Position)) = p0;
-  for(; p > snake; p -= sizeof(Position)){
-    *p = *(p - sizeof(Position));
-  }*/
-  for(int i = 1; i < length * sizeof(Position); i += sizeof(Position)){
-    *(snake + i) = *(p0 + i - sizeof(Position));
+  
+  Position *p = snake;
+  Position buffer[length];
+  for(int i = 0; i < length; i++){
+    buffer[i] = *(p + i * step);
   }
   
+  snake->x += offset_x;
+  snake->y += offset_y;
+  
+  p = snake;
+  for(int i = 1; i < length; i++){
+    *(p + i * step) = buffer[i - 1];
+  }
+  
+  CheckImpaction();
   DrawSnake();
-  //CheckImpaction();
+  free(&buffer);
 
   Serial.print(snake->y);
   Serial.print(" ");
-  Serial.print((snake + 1 * sizeof(Position))->y);
+  Serial.print((snake + 1 * step)->y);
   Serial.print(" ");
-  Serial.println((snake + 2 * sizeof(Position))->y);
+  Serial.println((snake + 2 * step)->y);
 }
 
 void CheckImpaction(){
-  if(snake->x >= BOUND_RIGHT || snake->x <= BOUND_LEFT || snake->y <= BOUND_UP || snake->y >= BOUND_DOWN){
+  if(snake->x >= BOUND_RIGHT - A || snake->x <= BOUND_LEFT || snake->y <= BOUND_UP || snake->y >= BOUND_DOWN - A){
     GameOver();
   }
-  for(Position *p = snake; p < snake + length * sizeof(Position); p += sizeof(Position)){
+  for(Position *p = snake; p < snake + length * step; p += step){
     if(snake->x == p->x && snake->y == p->y) GameOver();
   }
   if(snake->x == apple->x && snake->y == apple->y){
@@ -87,7 +85,17 @@ void Eat(){
   score++;
   length++;
 
-  snake = realloc(snake, length * sizeof(Position));
+  Position *snake_new = calloc(length, step);
+  *snake_new = *apple;
+  for(Position *p = snake; p < snake + length * step; p += step){
+    *(snake_new + step) = *p;
+  }
+  snake = snake_new;
+  
+  UpdateApple();
+}
+
+void UpdateApple(){
   apple->x = BOUND_MARGIN + random(WIDTH - A - 2 * BOUND_MARGIN);
   apple->y = BOUND_MARGIN + random(BOUND_HEIGHT - A - 2 * BOUND_MARGIN);
 }

@@ -10,7 +10,7 @@ void UpdateBound(){
 void DrawSnake(){
   Position *p = snake;
 
-  for(; p < snake + length * sizeof(Position); p += sizeof(Position)){
+  for(; p < snake + length * step; p += step){
     display.fillRect(p->x, p->y, A, A, 1);
   }
 }
