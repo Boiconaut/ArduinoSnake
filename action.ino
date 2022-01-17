@@ -44,23 +44,19 @@ void Move(){
       break;
   }
   
-  Position *p = snake;
-  Position buffer[length];
-  for(int i = 0; i < length; i++){
-    buffer[i] = *(p + i * step);
+  for(int i = 0; i < sizeof(snake_buffer); i++){
+    snake_buffer[i] = *(snake + i * step);
   }
   
   snake->x += offset_x;
   snake->y += offset_y;
   
-  p = snake;
-  for(int i = 1; i < length; i++){
-    *(p + i * step) = buffer[i - 1];
+   for(int i = 0; i < sizeof(snake_buffer); i++){
+    *(snake + (i + 1) * step) = snake_buffer[i];
   }
   
   CheckImpaction();
   DrawSnake();
-  free(&buffer);
 
   Serial.print(snake->y);
   Serial.print(" ");

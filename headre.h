@@ -9,6 +9,8 @@
 #define BOUND_RIGHT 125
 #define BOUND_UP 2
 #define BOUND_DOWN 54
+#define MAX_WIDTH 31
+#define MAX_HEIGHT 13
 #define SCORE_X 4
 #define SCORE_Y 56
 
@@ -39,3 +41,4 @@ struct Position{
 
 Position *snake;
 Position *apple;
+Position snake_buffer[MAX_WIDTH * MAX_HEIGHT];
